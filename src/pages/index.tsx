@@ -11,7 +11,7 @@ import {
 } from "@zach.codes/react-calendar";
 import { useEffect, useState } from "react";
 import "@zach.codes/react-calendar/dist/calendar-tailwind.css";
-import { Avatar, AvatarBadge, AvatarGroup, Tooltip } from "@chakra-ui/react";
+import { Avatar, Heading, Tooltip } from "@chakra-ui/react";
 
 interface DayData {
   date: Date;
@@ -20,7 +20,7 @@ interface DayData {
   problems: Set<string>;
 }
 
-const avatarMap = {
+const avatarMap: {[key: string]: string} = {
   apkirito: "/aaron.jpg",
   palak: "/palak.PNG",
 };
@@ -39,9 +39,8 @@ export default function Home() {
         if (!username) {
           return;
         }
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const avatar = avatarMap[username] as string;
-        if (!profile.recentSubmissionList) {
+        const avatar = avatarMap[username];
+        if (!profile.recentSubmissionList || !avatar) {
           return;
         }
         profile.recentSubmissionList.forEach((submission) => {
@@ -62,7 +61,6 @@ export default function Home() {
             name: username,
             problems: dateMap[date] || new Set(),
           };
-          sampleData.push(entry);
           sampleData.push(entry);
         });
       });
@@ -88,38 +86,41 @@ export default function Home() {
           <MonthlyBody events={profileData}>
             <MonthlyDay<DayData>
               renderDay={(data) => {
-                const losers = new Set(Object.keys(avatarMap))
+                const losers = new Set(Object.keys(avatarMap));
                 data.forEach((data) => {
                   losers.delete(data.name);
                 });
 
-                let text = ""
+                let text = "";
+                let color = "";
                 // Everyone did their work
                 if (losers.size == 0) {
-                  text = "Tie!"
+                  text = "Tie!";
                 } else if (losers.size == Object.keys(avatarMap).length) {
-                  text = "Yall Suck!"
+                  text = "Yall Suck!";
+                  color = "bg-red-200"
                 } else {
-                  text = `${[...losers].map(s => capitalizeFirstLetter(s)).join(", ")} Lost!`
+                  text = `${[...losers]
+                    .map((s) => capitalizeFirstLetter(s))
+                    .join(", ")} Lost!`;
+                  color = "bg-green-200"
                 }
-                
+
                 if (avatarMap)
-                return (
-                  <div>
-                    <p className="text-center mb-3">
-                    {text}
-                    </p>
-                    {data.map((item, index) => (
-                      <div className="mx-3 inline-flex" key={index}>
-                        <Tooltip
-                          label={`${item.name} Attempted ${item.problems.size} Problems!`}
-                        >
-                          <Avatar size="xl" name="Person" src={item.avatar} />
-                        </Tooltip>
-                      </div>
-                    ))}
-                  </div>
-                );
+                  return (
+                    <div className={`${color} rounded-lg`}>
+                      <Heading className="mb-3 text-center">{text}</Heading>
+                      {data.map((item, index) => (
+                        <div className="mx-3 inline-flex" key={index}>
+                          <Tooltip
+                            label={`${capitalizeFirstLetter(item.name)} Attempted ${item.problems.size} Problems!`}
+                          >
+                            <Avatar size="lg" name="Person" src={item.avatar} />
+                          </Tooltip>
+                        </div>
+                      ))}
+                    </div>
+                  );
               }}
             />
           </MonthlyBody>
