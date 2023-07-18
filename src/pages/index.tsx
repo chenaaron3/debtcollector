@@ -65,10 +65,7 @@ export default function Home() {
         });
       });
     }
-
-    if (sampleData) {
-      setProfileData(sampleData);
-    }
+    setProfileData(sampleData);
   }, [profiles]);
 
   return (
