@@ -22,7 +22,7 @@ interface DayData {
 
 const avatarMap: {[key: string]: string} = {
   apkirito: "/aaron.jpg",
-  palak: "/palak.PNG",
+  Palak45: "/palak.PNG",
 };
 
 export default function Home() {
@@ -93,6 +93,7 @@ export default function Home() {
                 // Everyone did their work
                 if (losers.size == 0) {
                   text = "Tie!";
+                  color = "bg-yellow-200"
                 } else if (losers.size == Object.keys(avatarMap).length) {
                   text = "Yall Suck!";
                   color = "bg-red-200"

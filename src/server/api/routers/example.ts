@@ -6,7 +6,7 @@ import {
 } from "~/server/api/trpc";
 import { LeetCode, type UserProfile } from "leetcode-query";
 
-const users = ["apkirito"]
+const users = ["apkirito", "Palak45"]
 
 export const exampleRouter = createTRPCRouter({
   getUserProfiles: publicProcedure
