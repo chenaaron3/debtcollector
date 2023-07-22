@@ -20,7 +20,7 @@ interface DayData {
   problems: Set<string>;
 }
 
-const avatarMap: {[key: string]: string} = {
+const avatarMap: { [key: string]: string } = {
   apkirito: "/aaron.jpg",
   Palak45: "/palak.PNG",
 };
@@ -33,8 +33,8 @@ export default function Home() {
   useEffect(() => {
     const sampleData: DayData[] = [];
     if (profiles) {
-      const dateMap: { [key: string]: Set<string> } = {};
       profiles.profiles.forEach((profile) => {
+        const dateMap: { [key: string]: Set<string> } = {};
         const username = profile.matchedUser?.username;
         if (!username) {
           return;
@@ -45,7 +45,8 @@ export default function Home() {
         }
         profile.recentSubmissionList.forEach((submission) => {
           const timestamp = parseInt(submission.timestamp);
-          const date = new Date(timestamp * 1000).toISOString().split("T")[0];
+          const d = new Date(timestamp * 1000);
+          const date = formatDate(d);
           if (date) {
             if (dateMap[date] == undefined) {
               dateMap[date] = new Set();
@@ -53,10 +54,13 @@ export default function Home() {
             dateMap[date]?.add(submission.title);
           }
         });
-        console.log(dateMap);
+        console.log(username, dateMap);
         Object.keys(dateMap).forEach((date) => {
+          const d = new Date(date);
+          // adjust time zone
+          d.setUTCHours(8)
           const entry: DayData = {
-            date: new Date(date),
+            date: d,
             avatar: avatar,
             name: username,
             problems: dateMap[date] || new Set(),
@@ -93,30 +97,51 @@ export default function Home() {
                 // Everyone did their work
                 if (losers.size == 0) {
                   text = "Tie!";
-                  color = "bg-yellow-200"
+                  color = "bg-yellow-200";
                 } else if (losers.size == Object.keys(avatarMap).length) {
                   text = "Yall Suck!";
-                  color = "bg-red-200"
+                  color = "bg-red-200";
                 } else {
                   text = `${[...losers]
                     .map((s) => capitalizeFirstLetter(s))
                     .join(", ")} Lost!`;
-                  color = "bg-green-200"
+                  color = "bg-green-200";
                 }
 
                 if (avatarMap)
                   return (
                     <div className={`${color} rounded-lg`}>
                       <Heading className="mb-3 text-center">{text}</Heading>
-                      {data.map((item, index) => (
-                        <div className="mx-3 inline-flex" key={index}>
-                          <Tooltip
-                            label={`${capitalizeFirstLetter(item.name)} Attempted ${item.problems.size} Problems!`}
-                          >
-                            <Avatar size="lg" name="Person" src={item.avatar} />
-                          </Tooltip>
-                        </div>
-                      ))}
+                      {data.map((item, index) => {
+                        const problems = Array.from(item.problems);
+                        problems.sort();
+                        return (
+                          <div className="mx-3 inline-flex" key={index}>
+                            <Tooltip
+                              label={
+                                <>
+                                  <div>
+                                    {`${capitalizeFirstLetter(
+                                      item.name
+                                    )} Attempted ${
+                                      item.problems.size
+                                    } Problems!`}
+                                  </div>
+                                  {problems.map((problem) => (
+                                    <div key={problem}>{problem}</div>
+                                  ))}
+                                </>
+                              }
+                            >
+                              <Avatar
+                                size="lg"
+                                name="Person"
+                                src={item.avatar}
+                              />
+                            </Tooltip>
+                          </div>
+                        );
+                      })}
                     </div>
                   );
               }}
@@ -130,4 +155,16 @@ export default function Home() {
 
 function capitalizeFirstLetter(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function formatDate(date: Date) {
+  const d = new Date(date),
+    year = d.getFullYear();
+  let month = (d.getMonth() + 1).toString(),
+    day = d.getDate().toString();
+
+  if (month.length < 2) month = "0" + month;
+  if (day.length < 2) day = "0" + day;
+
+  return [year, month, day].join("-");
 }
